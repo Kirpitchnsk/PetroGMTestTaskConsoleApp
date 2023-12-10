@@ -227,8 +227,9 @@ namespace TestTask
         }
         public static void Main()
         {
-            var fileName = "text.txt";
-            var data = GetData(fileName);
+            var fileName = "example.txt";
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+            var data = GetData(filePath);
             
             var mistakeList = CreateMistakeList(data);
             if(mistakeList.Count > 0)
