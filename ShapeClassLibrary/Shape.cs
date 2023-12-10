@@ -175,8 +175,45 @@
         {
             var intersectionPoints = new List<(double, double)>();
 
+            var nearestX = Math.Max(rect.x1, Math.Min(circle.x, rect.x2));
+            var nearestY = Math.Max(rect.y1, Math.Min(circle.y, rect.y2));
+
+            if (IsPointInsideCircle(nearestX, nearestY, circle.x, circle.y, circle.radius))
+            {
+                intersectionPoints.Add((nearestX, nearestY));
+            }
+
+            var listOfPoints1 = new List<(double, double)>();
+            listOfPoints1.Add((rect.x1, rect.y1));
+            listOfPoints1.Add((rect.x2, rect.y2));
+            var listOfPoints2 = new List<(double, double)>();
+            listOfPoints2.Add((rect.x2, rect.y1));
+            listOfPoints2.Add((rect.x2, rect.y2));
+            var listOfPoints3 = new List<(double, double)>();
+            listOfPoints3.Add((rect.x2, rect.y2));
+            listOfPoints3.Add((rect.x1, rect.y2));
+            var listOfPoints4 = new List<(double, double)>();
+            listOfPoints4.Add((rect.x1, rect.y2));
+            listOfPoints4.Add((rect.x1, rect.y1));
+
+            var side1 = new Line(listOfPoints1);
+            var side2 = new Line(listOfPoints2);
+            var side3 = new Line(listOfPoints3);
+            var side4 = new Line(listOfPoints4);
+
+            intersectionPoints.AddRange(GetIntersectionPoints(side1, circle));
+            intersectionPoints.AddRange(GetIntersectionPoints(side2, circle));
+            intersectionPoints.AddRange(GetIntersectionPoints(side3, circle));
+            intersectionPoints.AddRange(GetIntersectionPoints(side4, circle));
             return intersectionPoints;
         }
+
+        static bool IsPointInsideCircle(double x, double y, double circleCenterX, double circleCenterY, double circleRadius)
+        {
+            double distance = Math.Sqrt(Math.Pow(x - circleCenterX, 2) + Math.Pow(y - circleCenterY, 2));
+            return distance <= circleRadius;
+        }
+
         protected static List<(double, double)> GetIntersectionPoints(Line line, Circle circle)
         {
             var intersectionPoints = new List<(double, double)>();
