@@ -4,6 +4,33 @@ namespace TestTask
 {
     class Program
     {
+        public static void Main()
+        {
+            var fileName = "example.txt";
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+            var data = GetData(filePath);
+
+            var mistakeList = CreateMistakeList(data);
+            if (mistakeList.Count > 0)
+            {
+                foreach (var mistake in mistakeList)
+                {
+                    Console.WriteLine(mistake);
+                }
+                return;
+            }
+            var shapes = CreateShapes(data);
+
+            foreach (var shape in shapes)
+            {
+                shape.Draw();
+            }
+
+            for (int i = 0; i < shapes.Count - 1; i++)
+            {
+                shapes[i].Intersect(shapes[i + 1]);
+            }
+        }
         public static string GetData(string file_name)
         {
             if (File.Exists(file_name))
@@ -11,7 +38,7 @@ namespace TestTask
                 using (var reader = new StreamReader(file_name))
                 {
                     return reader.ReadToEnd();
-                }   
+                }
             }
             else return String.Empty;
         }
@@ -19,12 +46,12 @@ namespace TestTask
         {
             int minLength = Math.Min(a.Length, b.Length);
 
-            for(int i= 0; i < minLength; i++)
+            for (int i = 0; i < minLength; i++)
             {
                 if (a[i] != b[i]) return i;
             }
 
-            if(a.Length != b.Length) return minLength;
+            if (a.Length != b.Length) return minLength;
 
             return -1;
         }
@@ -32,12 +59,12 @@ namespace TestTask
         {
             var stringCounter = 1;
             var mistakes = new List<string>();
-            
+
             var strings = data.Split('\n');
-            
+
             foreach (var item in strings)
             {
-                if(String.Compare(item,"\r", StringComparison.OrdinalIgnoreCase) == 0 || String.Compare(item, "", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Compare(item, "\r", StringComparison.OrdinalIgnoreCase) == 0 || String.Compare(item, "", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     stringCounter++;
                     continue;
@@ -63,23 +90,23 @@ namespace TestTask
 
                 var lengthAll = shapeName.Length + 1;
                 var characteristicCounter = 0;
-                foreach (var characteristic in shapeCharacteristics) 
-                { 
-                    if(characteristicCounter != 0) 
+                foreach (var characteristic in shapeCharacteristics)
+                {
+                    if (characteristicCounter != 0)
                     {
                         int tryingResult;
-                        var tryingParsing = int.TryParse(characteristic,out tryingResult);
+                        var tryingParsing = int.TryParse(characteristic, out tryingResult);
 
-                        if(!tryingParsing)
+                        if (!tryingParsing)
                         {
                             mistakes.Add(item);
-                            mistakes.Add(new string(' ',lengthAll)+" ^");
+                            mistakes.Add(new string(' ', lengthAll) + " ^");
                             var errorMessage = $"Неизвестный символ, строка {stringCounter}";
                             mistakes.Add(errorMessage);
                         }
-                        else 
-                        { 
-                            if(shapeName == "circle" && characteristicCounter == 3 && tryingResult < 0)
+                        else
+                        {
+                            if (shapeName == "circle" && characteristicCounter == 3 && tryingResult < 0)
                             {
                                 mistakes.Add(item);
                                 mistakes.Add(new string(' ', lengthAll) + " ^");
@@ -94,12 +121,12 @@ namespace TestTask
 
                 if (isShapeNameCorrect)
                 {
-                    switch(shapeName)
+                    switch (shapeName)
                     {
                         case "circle":
                             {
                                 var circleItems = 4;
-                                if(shapeCharacteristics.Length != circleItems)
+                                if (shapeCharacteristics.Length != circleItems)
                                 {
                                     mistakes.Add(item);
                                     mistakes.Add(String.Empty);
@@ -163,97 +190,53 @@ namespace TestTask
 
             return mistakes;
         }
-        public static List<Shape> CreateShapeStorage(string data)
+        public static IShape? CreateShape(string input)
         {
-            var shapes = new List<Shape>();
-            var infoAboutShapes = data.Split('\n');
-            foreach(var item in infoAboutShapes) 
+            var shapeCharacteristics = input.Trim().Split();
+            var shapeName = shapeCharacteristics[0];
+            switch (shapeName)
             {
-                var shapeCharacteristics = item.Trim().Split();
-                var shapeName = shapeCharacteristics[0];
-                switch (shapeName)
-                {
-                    case "point":
-                        {
-                            var x = double.Parse(shapeCharacteristics[1]);
-                            var y = double.Parse(shapeCharacteristics[2]);
-                            var shapePoints = new List<(double, double)>();
-                            shapePoints.Add((x, y));
-                            var point = new Point(shapePoints);
-                            shapes.Add(point); 
-                            break;
-                        }
-                    case "rect":
-                        {
-                            var shapePoints = new List<(double, double)>();
-                            for (int i = 1; i < shapeCharacteristics.Length; i+=2)
-                            {
-                                var x = double.Parse(shapeCharacteristics[i]);
-                                var y = double.Parse(shapeCharacteristics[i+1]);
-                                shapePoints.Add((x, y));
-                            }
-                            var rect = new Rect(shapePoints);
-                            shapes.Add(rect);
-                            break;
-                        }
-                    case "line":
-                        {
-                            var shapePoints = new List<(double, double)>();
-                            for (int i = 1; i < shapeCharacteristics.Length; i+=2)
-                            {
-                                var x = double.Parse(shapeCharacteristics[i]);
-                                var y = double.Parse(shapeCharacteristics[i+1]);
-                                shapePoints.Add((x, y));
-                            }
-                            var line = new Line(shapePoints);
-                            shapes.Add(line);
-                            break;
-                        }
-                    case "circle":
-                        {
-                            var shapePoints = new List<(double, double)>();
-                            var x = double.Parse(shapeCharacteristics[1]);
-                            var y = double.Parse(shapeCharacteristics[2]);
-                            var radius = int.Parse(shapeCharacteristics[3]);
-                            shapePoints.Add((x, y));
-                            var circle = new Circle(shapePoints,radius);
-                            shapes.Add(circle);
-                            break;
-                        }
-                }
-                
+                case "point":
+                    {
+                        var x = double.Parse(shapeCharacteristics[1]);
+                        var y = double.Parse(shapeCharacteristics[2]);
+                        return new Point(x, y);
+                    }
+                case "rect":
+                    {
+                        var point1 = new Point(double.Parse(shapeCharacteristics[1]), double.Parse(shapeCharacteristics[2]));
+                        var point2 = new Point(double.Parse(shapeCharacteristics[3]), double.Parse(shapeCharacteristics[4]));
+
+                        return new Rect(point1,point2);
+                    }
+                case "line":
+                    {
+                        var point1 = new Point(double.Parse(shapeCharacteristics[1]), double.Parse(shapeCharacteristics[2]));
+                        var point2 = new Point(double.Parse(shapeCharacteristics[3]), double.Parse(shapeCharacteristics[4]));
+
+                        return new Line(point1,point2);
+                    }
+                case "circle":
+                    {
+                        var x = double.Parse(shapeCharacteristics[1]);
+                        var y = double.Parse(shapeCharacteristics[2]);
+                        var radius = int.Parse(shapeCharacteristics[3]);
+
+                        return new Circle(new Point(x,y), radius);
+                    }
+                default: return null;
+            }
+
+        }
+        public static List<IShape> CreateShapes(string data)
+        {
+            var shapes = new List<IShape>();
+            var infoAboutShapes = data.Split('\n');
+            foreach (var item in infoAboutShapes)
+            {
+                if(!(String.Compare(item, "\r", StringComparison.OrdinalIgnoreCase) == 0 || String.Compare(item, "", StringComparison.OrdinalIgnoreCase) == 0)) shapes.Add(CreateShape(item));
             }
             return shapes;
-        }
-        public static void Main()
-        {
-            var fileName = "example.txt";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
-            var data = GetData(filePath);
-            
-            var mistakeList = CreateMistakeList(data);
-            if(mistakeList.Count > 0)
-            {
-                foreach(var mistake in mistakeList)
-                {
-                    Console.WriteLine(mistake);
-                }
-            }
-            else
-            {
-                var shapes = CreateShapeStorage(data);
-
-                foreach (var shape in shapes)
-                {
-                    shape.Draw();
-                }
-
-                for (int i = 0; i < shapes.Count - 1; i++)
-                {
-                    shapes[i].Intersect(shapes[i + 1]);
-                }
-            }
-            
         }
     }
 }

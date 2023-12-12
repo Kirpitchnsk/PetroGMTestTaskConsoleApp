@@ -1,64 +1,68 @@
 ﻿namespace ShapeClassLibrary
 {
-    public class Point:Shape
+    public class Point:IShape
     {
-        public readonly double x;
-        public readonly double y;
-        public Point(List<(double, double)> points):base(points)
+        public readonly double X;
+        public readonly double Y;
+        public Point(double x,double y)
         {
-            x = points[0].Item1;
-            y = points[0].Item2;
-            shapeName = "point";
+            X = x; 
+            Y = y;
         }
-        public override void Draw()
+        public void Draw()
         {
-            base.Draw();
-            Console.WriteLine();
+            Console.WriteLine($"Point at {X}, {Y}");
         }
-        public override void Intersect(Shape other)
+        public void Intersect(IShape shape)
         {
-            base.Intersect(other);
+            var intersectionPoints = new List<Point>();
 
-            var otherShapeName = other.shapeName;
-
-            var intersectionPoints = new List<(double, double)>();
-
-            switch (otherShapeName)
+            switch (shape)
             {
-                case "circle":
-                    intersectionPoints = GetIntersectionPoints(this, (Circle)other);
-                    break;
-                case "line":
-                    intersectionPoints = GetIntersectionPoints(this,(Line)other);
-                    break;
-                case "rect":
-                    intersectionPoints = GetIntersectionPoints(this,(Rect)other);
-                    break;
-                case "point":
-                    intersectionPoints = GetIntersectionPoints((Point)other, this);
-                    break;
-            }
-            if (intersectionPoints.Count > 0)
-            {
-                if (intersectionPoints.Count == 1)
-                {
-                    Console.Write($"The {shapeName} and the {otherShapeName} have intersection at {intersectionPoints[0]}");
-                }
-                else
-                {
-                    var counter = 0;
-                    Console.Write($"The {shapeName} and the {otherShapeName} have intersections at");
-                    foreach (var point in intersectionPoints)
+                case Point point:
+                    intersectionPoints = ShapesIntersectionsFormulas.Intersect(this, point);
+                    if(intersectionPoints.Count > 0)
                     {
-                        if (counter != intersectionPoints.Count) Console.Write(" " + point + " and");
-                        else Console.Write(" " + point);
+                        Console.WriteLine($"The point 1 intersect point 2 at ({intersectionPoints[0].X}, {intersectionPoints[0].Y})");
                     }
-                }
-                Console.WriteLine();
-            }
-            else
-            {
-                Console.WriteLine($"The {shapeName} cannot intersect the {otherShapeName}");
+                    else
+                    {
+                        Console.WriteLine("The point 1 cannot inersect point 2");
+                    }
+                    break;
+                case Line line:
+                    intersectionPoints = ShapesIntersectionsFormulas.Intersect(this, line);
+                    if (intersectionPoints.Count > 0)
+                    {
+                        Console.WriteLine($"The point intersect line at ({intersectionPoints[0].X}, {intersectionPoints[0].Y})");
+                    }
+                    else
+                    {
+                        Console.WriteLine("The point cannot inersect line");
+                    }
+                    break;
+                case Circle circle:
+                    intersectionPoints = ShapesIntersectionsFormulas.Intersect(this, circle);
+                    if (intersectionPoints.Count > 0)
+                    {
+                        Console.WriteLine($"The point intersect circle at ({intersectionPoints[0].X}, {intersectionPoints[0].Y})");
+                    }
+                    else
+                    {
+                        Console.WriteLine("The point 1 cannot inersect circle");
+                    }
+                    break;
+                case Rect rect:
+                    intersectionPoints = ShapesIntersectionsFormulas.Intersect(this, rect);
+                    if (intersectionPoints.Count > 0)
+                    {
+                        Console.WriteLine($"The point 1 intersect rect at ({intersectionPoints[0].X}, {intersectionPoints[0].Y})");
+                    }
+                    else
+                    {
+                        Console.WriteLine("The point 1 cannot inersect rect");
+                    }
+                    break;
             }
         }
     }
